@@ -171,7 +171,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: d2c589dc862072a4ba89d8862edac4aa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5180,6 +5180,8 @@ MonoBehaviour:
   enemyPrefab: {fileID: 6626717887154751765, guid: f1e3c34a42e09394e9fd99d8ca7a9738,
     type: 3}
   deathPilePrefab: {fileID: 6295132674032247086, guid: 28cbd3271d8de6f459e0dc7145a42df9,
+    type: 3}
+  endGamePrefab: {fileID: 8219590976839881526, guid: 256c8705a501ae34d943d7d8fca07dc3,
     type: 3}
 --- !u!4 &1447477986
 Transform:

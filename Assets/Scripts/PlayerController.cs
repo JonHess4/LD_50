@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour {
 
   // Update is called once per frame
   void Update() {
-
+    Vector3 oldPos = new Vector3(this.body.transform.position.x, this.body.transform.position.y, this.body.transform.position.z);
     // if can move
     if (this.canMove) {
       // get movement input
@@ -42,9 +42,9 @@ public class PlayerController : MonoBehaviour {
     }
 
     if (this.hasTriedMove) {
-        // halt user inputs while resolving NPC movement
-        this.canMove = false;
-        this.canMove = EnemyService.moveEnemies(this.body.transform.position);
+      // halt user inputs while resolving NPC movement
+      this.canMove = false;
+      this.canMove = EnemyService.moveEnemies(oldPos, this.body.transform.position);
     }
     this.hasTriedMove = false;
   }

@@ -46,7 +46,9 @@ public class EnemyService : MonoBehaviour {
     deathPileObjs = new List<GameObject>();
   }
 
-  public static bool moveEnemies(Vector3 playerPos) {
+  // Use Old Pos for enemy movement and newPos for if player has lost
+  public static bool moveEnemies(Vector3 oldPos, Vector3 newPos) {
+    string stringPlayerPos = MapService.vec3ToStringKey(newPos);
     Tilemap tilemap = MapService.getTilemap();
     HashSet<GameObject> objsToDestroy = new HashSet<GameObject>();
 
@@ -57,7 +59,7 @@ public class EnemyService : MonoBehaviour {
     // move each enemy in the enemy list
     enemyList.ForEach(enemy => {
 
-      Vector3 rawDir = (playerPos - enemy.transform.position).normalized;
+      Vector3 rawDir = (oldPos - enemy.transform.position).normalized;
       Vector3 dir = new Vector3();
       DirectionEnum dirEnum;
 
@@ -86,16 +88,16 @@ public class EnemyService : MonoBehaviour {
             dirEnum = rawDir.y > 0 ? DirectionEnum.NE : DirectionEnum.SE;
             break;
           case DirectionEnum.NE:
-            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.N : DirectionEnum.E;
+            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.NW : DirectionEnum.E;
             break;
           case DirectionEnum.SE:
-            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.E : DirectionEnum.S;
+            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.E : DirectionEnum.SW;
             break;
           case DirectionEnum.NW:
-            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.N : DirectionEnum.W;
+            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.NE : DirectionEnum.W;
             break;
           case DirectionEnum.SW:
-            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.W : DirectionEnum.S;
+            dirEnum = rawDir.y > rawDir.x ? DirectionEnum.W : DirectionEnum.SE;
             break;
           case DirectionEnum.W:
             dirEnum = rawDir.y > 0 ? DirectionEnum.NW : DirectionEnum.SW;
@@ -126,7 +128,10 @@ public class EnemyService : MonoBehaviour {
     enemyList.ForEach(enemy => {
       // TODO: If in same position as another enemy, collapse enemy there
       string enemyPosString = MapService.vec3ToStringKey(enemy.transform.position);
-      if (deathPileList.Contains(enemyPosString)) {
+      if (enemyPosString == stringPlayerPos) {
+        // TODO: End the game
+        Debug.Log("Game Over");
+      } else if (deathPileList.Contains(enemyPosString)) {
         Debug.Log("Death Pile Found");
         objsToDestroy.Add(enemy);
       } else if (posDict.ContainsKey(enemyPosString)) {

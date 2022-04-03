@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour {
   void Update() {
     Vector3 oldPos = new Vector3(this.body.transform.position.x, this.body.transform.position.y, this.body.transform.position.z);
     // if can move
+    this.canMove = !EnemyService.isGameOver;
     if (this.canMove) {
       // get movement input
       Vector2Int movementInput = this.getMovementInput();

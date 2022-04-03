@@ -6,24 +6,32 @@ using UnityEngine.Tilemaps;
 public class EnemyController : MonoBehaviour {
   public GameObject enemyPrefab;
   public GameObject deathPilePrefab;
+  public GameObject endGamePrefab;
 
   private PlayerController playerController;
 
-private int oldSpawnCount = 2;
+  private int oldSpawnCount = 2;
   private int spawnCount = 3;
 
   void Start() {
     this.playerController = Object.FindObjectOfType<PlayerController>();
     EnemyService.setDeathPilePrefab(this.deathPilePrefab);
+    EnemyService.setEndGamePrefab(this.endGamePrefab);
     this.spawnEnemies(this.spawnCount, this.playerController.body.transform.position);
 
   }
 
   void Update() {
     if (EnemyService.enemyList.Count <= 0) {
-      int newSpawnCount = System.Math.Min(this.spawnCount + this.oldSpawnCount, 144);
+      int newSpawnCount = System.Math.Min(this.spawnCount + this.oldSpawnCount, 233);
       this.oldSpawnCount = this.spawnCount;
       this.spawnCount = newSpawnCount;
+      this.spawnEnemies(this.spawnCount, this.playerController.body.transform.position);
+    } else if (EnemyService.isGameOver && Input.GetKeyDown(KeyCode.Space)) {
+      EnemyService.isGameOver = false;
+      this.playerController.body.transform.position = new Vector3(1, 0, 1);
+      this.spawnCount = 3;
+      this.oldSpawnCount = 2;
       this.spawnEnemies(this.spawnCount, this.playerController.body.transform.position);
     }
   }

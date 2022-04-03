@@ -12,6 +12,14 @@ public class EnemyService : MonoBehaviour {
 
   private static Vector3Int tileCharDif = new Vector3Int(0, 1, 1);
 
+  public static bool isGameOver = false;
+  public static GameObject endGamePrefab;
+  public static GameObject endGameScreen = null;
+
+  public static void setEndGamePrefab(GameObject newEndGamePrefab) {
+    endGamePrefab = newEndGamePrefab;
+  }
+
   public static Dictionary<DirectionEnum, Vector3> getDirVectDict() {
     if (dirVectDict == null) {
       dirVectDict = new Dictionary<DirectionEnum, Vector3>();
@@ -34,6 +42,17 @@ public class EnemyService : MonoBehaviour {
     return enemyList;
   }
   public static void setEnemyList(List<GameObject> newEnemyList) {
+    if (enemyList != null) {
+      enemyList.ForEach(enemy => {
+        Destroy(enemy);
+      });
+    }
+
+    if (endGameScreen != null) {
+      Destroy(endGameScreen);
+      endGameScreen = null;
+    };
+
     enemyList = newEnemyList;
     deathPileList = new HashSet<string>();
 
@@ -130,6 +149,9 @@ public class EnemyService : MonoBehaviour {
       string enemyPosString = MapService.vec3ToStringKey(enemy.transform.position);
       if (enemyPosString == stringPlayerPos) {
         // TODO: End the game
+        isGameOver = true;
+        endGameScreen = Instantiate(endGamePrefab, new Vector3(1, 1, 4), new Quaternion());
+
         Debug.Log("Game Over");
       } else if (deathPileList.Contains(enemyPosString)) {
         Debug.Log("Death Pile Found");

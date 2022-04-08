@@ -12,34 +12,19 @@ public class PlayerController : MonoBehaviour {
   private float yIndexGroundDiff = 1f;
   private float walkAnimationTime = .5f;
   private bool hasTriedMove = false;
+  // move delay to allow for consistent diagonal movement and changing face without moving
+  private float moveDelay = 0.05f;
 
   // Update is called once per frame
   void Update() {
+    // base enemy pathing on old position
     Vector3 oldPos = new Vector3(this.body.transform.position.x, this.body.transform.position.y, this.body.transform.position.z);
+
     // if can move
-    this.canMove = !EnemyService.isGameOver;
-    if (this.canMove) {
+    if (this.canMove && !EnemyService.isGameOver) {
       // get movement input
       Vector2Int movementInput = this.getMovementInput();
-
-      if (movementInput.x == 0 && movementInput.y == 0) {
-        // no direction inputs detected, clear out elapsed time
-        this.elapsedTime = 0;
-
-      } else if (this.elapsedTime == 0) {
-        // user just started moving, call tryMove and start tracking elapsed time
-        this.elapsedTime += Time.deltaTime;
-        this.tryMove(this.body.transform.position, movementInput);
-        this.hasTriedMove = true;
-      } else {
-        // user is continuing to move, wait until move animation is finished to update their position again
-        this.elapsedTime += Time.deltaTime;
-        if (this.elapsedTime >= this.walkAnimationTime) {
-          this.elapsedTime = this.elapsedTime % this.walkAnimationTime;
-          this.tryMove(this.body.transform.position, movementInput);
-          this.hasTriedMove = true;
-        }
-      }
+      this.hasTriedMove = this.resolveMovementInput(movementInput);
     }
 
     if (this.hasTriedMove) {
@@ -53,26 +38,50 @@ public class PlayerController : MonoBehaviour {
   private Vector2Int getMovementInput() {
     Vector2Int direction = new Vector2Int();
 
-    // get the sensitive Input.GetAxis (sensitive for better diagonal movement controls)
     float xAxis = Input.GetAxis(AxisEnum.Horizontal.ToString());
     float yAxis = Input.GetAxis(AxisEnum.Vertical.ToString());
 
-    if (xAxis != 0 || yAxis != 0) {
-      // get the absolute value of the sensitive Input.GetAxis
-      float xAbs = Mathf.Abs(xAxis);
-      float yAbs = Mathf.Abs(yAxis);
+    bool isDiagonalOnly = Input.GetButton("Fire2");
+
+    if ((isDiagonalOnly && xAxis != 0 && yAxis != 0) || (!isDiagonalOnly && (xAxis != 0 || yAxis != 0))) {
 
       // restrain each axis value to -1, 0, or 1 for maths
       int xInt = xAxis > 0 ? 1 : (xAxis < 0 ? -1 : 0);
       int yInt = yAxis > 0 ? 1 : (yAxis < 0 ? -1 : 0);
 
-      // if both directions are pressed, we know the player wants to move diagonally.
-      // if only one direction is pressed, sensitivity tolerance allows for slight delay for more consistend diagonal movement using arrow keys
-      direction.x = xAbs >= 0.5 || (xAbs > 0 && yAbs > 0) ? xInt : 0;
-      direction.y = yAbs >= 0.5 || (xAbs > 0 && yAbs > 0) ? yInt : 0;
+      direction.x = xInt;
+      direction.y = yInt;
     }
 
     return direction;
+  }
+
+  private bool resolveMovementInput(Vector2Int movementInput) {
+    bool hasTriedMove = false;
+
+    if (movementInput.x == 0 && movementInput.y == 0) {
+      // no direction inputs detected, clear out elapsed time
+      // set to a negative to act as a buffer for future inputs
+      this.elapsedTime = -1 * this.moveDelay;
+
+    } else if (this.elapsedTime <= 0) {
+      // user just started moving, call tryMove and start tracking elapsed time
+      this.elapsedTime += Time.deltaTime;
+      if (this.elapsedTime > 0) {
+        this.tryMove(this.body.transform.position, movementInput);
+        hasTriedMove = true;
+      }
+    } else {
+      // user is continuing to move, wait until move animation is finished to update their position again
+      this.elapsedTime += Time.deltaTime;
+      if (this.elapsedTime >= this.walkAnimationTime) {
+        this.elapsedTime = this.elapsedTime % this.walkAnimationTime;
+        this.tryMove(this.body.transform.position, movementInput);
+        hasTriedMove = true;
+      }
+    }
+
+    return hasTriedMove;
   }
 
   private void tryMove(Vector3 startingPos, Vector2Int movementInput) {
@@ -106,12 +115,11 @@ public class PlayerController : MonoBehaviour {
   }
 
   private Vector3 getTargetTilePos(Vector3 startingPos, Vector2 movementInput) {
-    Vector3 targetTilePos = startingPos;
+    Vector3 targetTilePos = new Vector3();
 
-    float xTarget = startingPos.x + movementInput.x;
-    float yTarget = startingPos.y + movementInput.y - this.yIndexGroundDiff;
-    float zTarget = startingPos.z - this.zIndexGroundDiff;
-    targetTilePos = new Vector3(xTarget, yTarget, zTarget);
+    targetTilePos.x = startingPos.x + movementInput.x;
+    targetTilePos.y = startingPos.y + movementInput.y - this.yIndexGroundDiff;
+    targetTilePos.z = startingPos.z - this.zIndexGroundDiff;
 
     return targetTilePos;
   }

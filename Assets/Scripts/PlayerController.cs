@@ -41,6 +41,9 @@ public class PlayerController : MonoBehaviour {
     float xAxis = Input.GetAxis(AxisEnum.Horizontal.ToString());
     float yAxis = Input.GetAxis(AxisEnum.Vertical.ToString());
 
+    // float xAxis = Input.GetAxis("DPadX");
+    // float yAxis = Input.GetAxis("DPadY");
+
     bool isDiagonalOnly = Input.GetButton("Fire2");
 
     if ((isDiagonalOnly && xAxis != 0 && yAxis != 0) || (!isDiagonalOnly && (xAxis != 0 || yAxis != 0))) {
